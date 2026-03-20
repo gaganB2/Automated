@@ -2,37 +2,37 @@ name: Validate and Deploy HTML to GitHub Pages
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     permissions:
       pages: write
       id-token: write
 
     steps:
-      # Step 1: Get the code from the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Validate the HTML file
-      - name: Validate HTML
-        # THE FIX IS HERE: We need to add "@v1" to specify the version.
-        uses: html-validate/action@v1
+      # HTML validation — pick one:
+      - name: Validate HTML syntax
+        uses: Cyb3r-Jak3/html5validator-action@v7.2.0
         with:
-          # Tell the validator which file(s) to check
-          files: 'index.html'
-      
-      # Step 3: Prepare the file for GitHub Pages deployment
+          root: '.'
+
+      # OR richer validation (HTML + CSS + links)
+      # - name: Proof HTML validation
+      #   uses: anishathalye/proof-html@v2
+      #   with:
+      #     directory: '.'
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # The path should be the root directory since index.html is there
           path: '.'
 
-      # Step 4: Deploy the artifact to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
