@@ -1,48 +1,40 @@
-# Name of your workflow
-name: Deploy HTML to GitHub Pages
+# .github/workflows/deploy.yml
 
-# Controls when the action will run. 
-# Triggers the workflow on push events to the "main" branch.
+name: Validate and Deploy HTML to GitHub Pages
+
 on:
   push:
     branches: [ "main" ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This job is named "deploy"
   deploy:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     
-    # Grant GITHUB_TOKEN the permissions it needs to deploy to GitHub Pages
     permissions:
       pages: write
       id-token: write
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Step 1: Get the code from the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: (CI) Validate the HTML file
-      # We use a community action to lint HTML files.
-      - name: Lint HTML
-        uses: anmol098/w3c-html-validator@v1.0.3
+      # Step 2: (CI) Validate the HTML file using a more robust validator
+      # This action is well-maintained and provides great feedback.
+      - name: Validate HTML
+        uses: html-validate/action@v1
         with:
-          # The path to the HTML file to be validated
-          path: index.html
+          # Tell the validator which file(s) to check
+          files: 'index.html'
       
-      # Step 3: (CD) Upload artifact for GitHub Pages
-      # This step packages our file(s) into an artifact for deployment.
+      # Step 3: (CD) Prepare the file for GitHub Pages deployment
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # The folder to upload is the root of our repository
+          # The path should be the root directory since index.html is there
           path: '.'
 
-      # Step 4: (CD) Deploy to GitHub Pages
-      # This step takes the artifact from the previous step and deploys it.
+      # Step 4: (CD) Deploy the artifact to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
